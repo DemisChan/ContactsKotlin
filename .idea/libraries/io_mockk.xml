@@ -1,0 +1,15 @@
+<component name="libraryTable">
+  <library name="io.mockk" type="repository">
+    <properties maven-id="io.mockk:mockk:1.13.5" />
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/io/mockk/mockk/1.13.5/mockk-1.13.5.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/io/mockk/mockk-dsl/1.13.5/mockk-dsl-1.13.5.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/io/mockk/mockk-agent/1.13.5/mockk-agent-1.13.5.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/io/mockk/mockk-agent-api/1.13.5/mockk-agent-api-1.13.5.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/io/mockk/mockk-core/1.13.5/mockk-core-1.13.5.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/org/jetbrains/kotlin/kotlin-stdlib-common/1.8.20/kotlin-stdlib-common-1.8.20.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

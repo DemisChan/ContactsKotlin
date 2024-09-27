@@ -1,6 +1,5 @@
 package contacts
 
-import java.io.*
 import java.io.Serializable
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -16,18 +15,15 @@ A method that takes a string that represents a property that the class is able t
 A method that takes a string representation of the property and returns the value of this property.
  **/
 
-enum class Action {
-    ADD, REMOVE, EDIT, COUNT, LIST, SEARCH, RECORD, MENU, EXIT
-}
 
-class ContactBook(private val filename: String?): Serializable {
+class ContactBook() : Serializable {
 
 
-    init {
-        if (filename != null) {
-            loadFromFile()
-        }
-    }
+//    init {
+//        if (filename != null) {
+//            loadFromFile()
+//        }
+//    }
 
     private val a = """[^\+?][A-Za-z0-9]{2,}(\s|-)?(\(?[A-Za-z0-9]{2,}\)?)?((\s|-)?[A-Za-z0-9]{2,})*"""
     private val b = """(^\+)?\(?[A-Za-z0-9]{1,}\)?((\s|-)?[A-Za-z0-9]{2,})*"""
@@ -38,7 +34,7 @@ class ContactBook(private val filename: String?): Serializable {
 
     private val regex = Regex(concat)
 
-    private var contacts: MutableList<BaseContact> = mutableListOf()
+    var contacts: MutableList<BaseContact> = mutableListOf()
 
     private var birthday = ""
         set(value) {
@@ -102,8 +98,8 @@ class ContactBook(private val filename: String?): Serializable {
         println("The record added.")
     }
 
-    fun add() {
-        when (readln()) {
+    fun add(type: String? = null) {
+        when (type) {
             "person" -> {
                 addPerson()
             }
@@ -127,7 +123,7 @@ class ContactBook(private val filename: String?): Serializable {
                 print("Select a record:")
                 val n = readln().toInt() - 1
                 contacts.removeAt(n)
-                print("The record removed!")
+//                print("The record removed!")
             }
         }
         println()
@@ -177,37 +173,80 @@ class ContactBook(private val filename: String?): Serializable {
 
 fun main() {
     val contacts = ContactBook()
-    val phoneBookUI = Ui()
+    val phoneBookUI = UiImproved()
     while (true) {
-        phoneBookUI.displayMainMenu(action = Action.MENU)
-        val actionInput = readln()
-        val action = try {
-            Action.valueOf(actionInput.uppercase())
-        } catch (e: IllegalArgumentException) {
-            println("Invalid action.")
-            continue
-        }
+        val action = MenuAction.fromString(phoneBookUI.displayMainMenu())
+//        val actionInput = readln()
+//        val action = try {
+//            Action.valueOf(actionInput.uppercase())
+//        } catch (e: IllegalArgumentException) {
+//            println("Invalid action.")
+//            continue
+//        }
         when (action) {
-            Action.ADD -> {
-                phoneBookUI.displayAddMenu(Action.ADD)
-                contacts.add()
+            MenuAction.ADD -> {
+                val type = phoneBookUI.displayAddMenu()
+                contacts.add(type)
             }
-            Action.REMOVE -> contacts.remove()
-            Action.EDIT -> contacts.edit()
-            Action.COUNT -> contacts.count()
-            Action.LIST -> {
-                contacts.info()
-                phoneBookUI.displayListMenu(Action.LIST)
-                contacts.listOption()
-                readln()
-                continue
 
+            MenuAction.LIST -> handleListAction(contacts, phoneBookUI)
+            MenuAction.EDIT -> contacts.edit()
+            MenuAction.COUNT -> contacts.count()
+            MenuAction.REMOVE -> contacts.remove()
+            MenuAction.SEARCH -> {}
+            MenuAction.RECORD -> {
+                phoneBookUI.displayRecordMenu()
             }
-            Action.RECORD -> {
-                phoneBookUI.displayRecordMenu(Action.RECORD)
-            }
-            Action.MENU -> continue
-            Action.EXIT -> break
+            MenuAction.MENU -> {}
+            MenuAction.EXIT -> break
         }
     }
 }
+
+fun handleListAction(contacts: ContactBook, ui: UiImproved) {
+    contacts.info()
+    while (true) {
+        val listAction = ui.displayListMenu()
+        if (listAction == "back") break
+        val selectIndex = listAction.toIntOrNull()
+        if (selectIndex != null && selectIndex in 1..contacts.contacts.size) {
+            val contact = contacts.contacts[selectIndex - 1]
+            contact.detailedInfo()
+
+            while (true) {
+                val recordAction = ui.displayRecordMenu()
+                when (recordAction.lowercase()) {
+                    "edit" -> {
+                        handleEditContact(contact, ui)
+                        println("Saved")
+                        contact.detailedInfo()
+                    }
+
+                    "delete" -> {
+                        contacts.remove()
+                        println("The record is deleted.")
+                        break
+                    }
+
+                    "menu" -> return
+                    else -> println("Invalid action.")
+                }
+            }
+        } else {
+            println("Invalid input, please enter a valid number.")
+        }
+    }
+}
+
+fun handleEditContact(contact: BaseContact, ui: UiImproved) {
+    val fields = contact.getPossibleProperties()
+    val field = ui.selectFieldToEdit(fields)
+    print("Enter $field: ")
+    val newValue = readln()
+    contact.setProperty(field, newValue)
+    contact.modifiedTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm"))
+}
+
+
+
+
